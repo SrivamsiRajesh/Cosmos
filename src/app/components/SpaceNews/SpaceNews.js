@@ -37,7 +37,7 @@ const SpaceNews = () => {
 
   useEffect(() => {
     const API_KEY = '4b48cd7e763f3bdaebd072f57e455fbb'; // Replace with your actual GNews API key
-    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent('space OR aerospace OR NASA OR SpaceX')}&lang=en&country=us&max=10&apikey=${API_KEY}`;
+    const url = `https://gnews.io/api/v4/search?q=NASA OR ISRO OR AEROSPACE&lang=en&country=us&max=10&apikey=${API_KEY}`;
 
     fetch(url)
       .then(response => {

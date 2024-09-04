@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Canvas } from "@react-three/fiber";
 import { Stars } from "@react-three/drei";
-import { FiCheckSquare, FiX } from "react-icons/fi";
+import { FiCheckSquare, FiX, FiCalendar } from "react-icons/fi";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from 'next/link';
 
@@ -76,7 +76,8 @@ const EventForm = ({ addNotification }) => {
           });
 
           if (!response.ok) {
-            throw new Error('Failed to submit form');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to submit form');
           }
 
           const data = await response.json();
@@ -85,69 +86,68 @@ const EventForm = ({ addNotification }) => {
           addNotification("Event submitted successfully!");
         } catch (error) {
           console.error('Error:', error);
-          addNotification("Error submitting event. Please try again.");
+          addNotification(`Error submitting event: ${error.message}`);
         } finally {
           setSubmitting(false);
         }
       }}
     >
       {({ isSubmitting }) => (
-        <Form className="bg-white/80 shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
-            Add Your Community Space Meeting
-          </h2>
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-gray-700">
-              Name
-            </label>
+        <Form className="bg-white/80 shadow-lg rounded-lg p-6 space-y-6">
+          <div>
+            <label htmlFor="name" className="block text-lg font-medium mb-1">Name</label>
             <Field
               type="text"
               name="name"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+              placeholder="Enter your name here"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
             />
-            <ErrorMessage name="name" component="div" className="text-red-500 text-sm" />
+            <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
           </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700">
-              Email
-            </label>
+
+          <div>
+            <label htmlFor="email" className="block text-lg font-medium mb-1">Email</label>
             <Field
               type="email"
               name="email"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+              placeholder="Enter your email here"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
             />
-            <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+            <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
           </div>
-          <div className="mb-4">
-            <label htmlFor="eventDate" className="block text-gray-700">
-              Date and Time
+
+          <div>
+            <label htmlFor="eventDate" className="block text-lg font-medium mb-1 flex items-center">
+              Date and Time <FiCalendar className="ml-2" />
             </label>
             <Field
               type="datetime-local"
               name="eventDate"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
             />
-            <ErrorMessage name="eventDate" component="div" className="text-red-500 text-sm" />
+            <ErrorMessage name="eventDate" component="div" className="text-red-500 text-sm mt-1" />
           </div>
-          <div className="mb-4">
-            <label htmlFor="description" className="block text-gray-700">
-              Description
-            </label>
+
+          <div>
+            <label htmlFor="description" className="block text-lg font-medium mb-1">Description</label>
             <Field
               as="textarea"
               name="description"
               rows="4"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+              placeholder="Enter a brief description of the event"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
             />
-            <ErrorMessage name="description" component="div" className="text-red-500 text-sm" />
+            <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
           </div>
+
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300"
+            className={`w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Submit
+            {isSubmitting ? 'Submitting...' : 'Submit'}
           </button>
+
           <Link href="/community-spaces" className="w-full mt-2 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition duration-300 inline-block text-center">
             Check Out Community Spaces
           </Link>
@@ -216,6 +216,12 @@ const Gaze = () => {
 
       <div className="rounded-lg overflow-hidden" style={gradientStyle}>
         <div className="bg-black/70 p-6 h-full">
+          <h2 className="text-2xl font-bold mb-4 text-center text-white">
+            Add Your Community Space Meeting
+          </h2>
+          <p className="text-center text-gray-300 mb-6">
+            Share your astronomy event with the community. Fill out the form below to add your meeting to our list of community spaces.
+          </p>
           <EventForm addNotification={addNotification} />
         </div>
       </div>
