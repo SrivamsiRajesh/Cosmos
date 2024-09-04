@@ -6,7 +6,7 @@ import Spline from '@splinetool/react-spline/next';
 
 const AboutUs = () => {
   return (
-    <section
+    <section id="aboutUs"
       className="relative mx-auto max-w-7xl px-4 py-16 overflow-hidden text-white"
       style={{
         background: "#020617", // Solid dark background

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Canvas } from "@react-three/fiber";
 import { Stars } from "@react-three/drei";
+import Link from 'next/link';
 
 export const Features = () => {
   return (
@@ -45,6 +46,7 @@ export const Features = () => {
               bgColor="bg-indigo-500"
               textColor="text-indigo-500"
               direction="left"
+              link="./components/PlanetInfo"
             />
             <ServiceCard
               title="Space News Feed 📰"
@@ -53,6 +55,7 @@ export const Features = () => {
               bgColor="bg-purple-500"
               textColor="text-purple-500"
               direction="right"
+              link="./components/SpaceNews"
             />
           </div>
           <div className="flex flex-col w-full mb-5 sm:flex-row">
@@ -63,6 +66,7 @@ export const Features = () => {
               bgColor="bg-blue-400"
               textColor="text-blue-400"
               direction="left"
+              link="./components/Gaze"
             />
             <ServiceCard
               title="Rocket Launches 🚀"
@@ -71,6 +75,7 @@ export const Features = () => {
               bgColor="bg-yellow-400"
               textColor="text-yellow-400"
               direction="right"
+              link="./components/RocketLaunches"
             />
           </div>
         </div>
@@ -79,7 +84,7 @@ export const Features = () => {
   );
 };
 
-const ServiceCard = ({ title, description, borderColor, bgColor, textColor, direction }) => {
+const ServiceCard = ({ title, description, borderColor, bgColor, textColor, direction, link }) => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.2, // Increased threshold for earlier triggering
@@ -106,11 +111,13 @@ const ServiceCard = ({ title, description, borderColor, bgColor, textColor, dire
             hover:shadow-[0_0_15px_rgba(var(--tw-clr-${borderColor.split('-')[1]}),0.5)]
           `}
         >
-          <div className="flex items-center -mt-1">
-            <h3 className="my-2 ml-3 text-lg font-bold text-white">{title}</h3>
-          </div>
-          <p className={`mt-3 mb-1 text-xs font-medium ${textColor} uppercase`}>------------</p>
-          <p className="mb-2 text-gray-300">{description}</p>
+          <Link href={link} className="block">
+            <div className="flex items-center -mt-1">
+              <h3 className="my-2 ml-3 text-lg font-bold text-white hover:underline">{title}</h3>
+            </div>
+            <p className={`mt-3 mb-1 text-xs font-medium ${textColor} uppercase`}>------------</p>
+            <p className="mb-2 text-gray-300 hover:text-gray-100">{description}</p>
+          </Link>
         </div>
       </div>
     </motion.div>

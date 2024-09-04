@@ -9,9 +9,9 @@ const Home = () => {
   return (
     <main className="bg-[#020617] min-h-screen">
     <Hero className="mb-12" />
+    <AboutUs className="mb-12" />
     <Features className="mb-12" />
     <Image className="mb-12" />
-    <AboutUs className="mb-12" />
     <FAQ />
   </main>
   );
