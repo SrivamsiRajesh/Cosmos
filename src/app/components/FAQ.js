@@ -29,7 +29,7 @@ const FAQ = () => {
 
   return (
     <section
-      className="relative w-full px-6 pb-8 -mt-1 overflow-hidden"
+      className="relative w-full px-6 pb-8 overflow-hidden"
       style={{
         background: "#020617",
       }}
@@ -41,40 +41,43 @@ const FAQ = () => {
         </Canvas>
       </div>
 
-      <div className="relative z-10 mx-auto max-w-2xl">
-        <div className="flex flex-col items-center">
-          <h2 className="mt-5 text-center text-3xl font-bold tracking-tight text-white md:text-5xl">
-            Frequently Asked Questions
-          </h2>
-        </div>
-        <div className="mx-auto mt-8 grid max-w-xl divide-y divide-neutral-200">
-          {faqs.map((faq, index) => (
-            <div className="py-5" key={index}>
-              <details className="group">
-                <summary className="flex cursor-pointer list-none items-center justify-between font-medium text-white">
-                  <span>{faq.question}</span>
-                  <span className="transition">
-                    <svg
-                      fill="none"
-                      height="24"
-                      shapeRendering="geometricPrecision"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      viewBox="0 0 24 24"
-                      width="24"
-                    >
-                      <path d="M6 9l6 6 6-6"></path>
-                    </svg>
-                  </span>
-                </summary>
-                <div className="mt-3 p-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-gray-200">
-                  {faq.answer}
-                </div>
-              </details>
-            </div>
-          ))}
+      {/* Wrapper div with margin */}
+      <div className="mt-16"> {/* Add margin-top here */}
+        <div className="relative z-10 mx-auto max-w-2xl">
+          <div className="flex flex-col items-center">
+            <h2 className="mt-5 text-center text-3xl font-bold tracking-tight text-white md:text-5xl">
+              Frequently Asked Questions
+            </h2>
+          </div>
+          <div className="mx-auto mt-8 grid max-w-xl divide-y divide-neutral-200">
+            {faqs.map((faq, index) => (
+              <div className="py-5" key={index}>
+                <details className="group">
+                  <summary className="flex cursor-pointer list-none items-center justify-between font-medium text-white">
+                    <span>{faq.question}</span>
+                    <span className="transition">
+                      <svg
+                        fill="none"
+                        height="24"
+                        shapeRendering="geometricPrecision"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                        width="24"
+                      >
+                        <path d="M6 9l6 6 6-6"></path>
+                      </svg>
+                    </span>
+                  </summary>
+                  <div className="mt-3 p-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-gray-200">
+                    {faq.answer}
+                  </div>
+                </details>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

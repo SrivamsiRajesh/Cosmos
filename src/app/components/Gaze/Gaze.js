@@ -1,46 +1,230 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Stars } from "@react-three/drei";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import { Canvas } from "@react-three/fiber";
+import { Stars } from "@react-three/drei";
+import { FiCheckSquare, FiX } from "react-icons/fi";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from 'next/link';
 
-const Navbar = () => {
+const SlideInNotifications = ({ notifications, setNotifications }) => {
+  const removeNotif = (id) => {
+    setNotifications((pv) => pv.filter((n) => n.id !== id));
+  };
+
+  return (
+    <div className="flex flex-col gap-1 w-72 fixed top-2 right-2 z-50 pointer-events-none">
+      <AnimatePresence>
+        {notifications.map((n) => (
+          <Notification removeNotif={removeNotif} {...n} key={n.id} />
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const NOTIFICATION_TTL = 5000;
+
+const Notification = ({ text, id, removeNotif }) => {
+  useEffect(() => {
+    const timeoutRef = setTimeout(() => {
+      removeNotif(id);
+    }, NOTIFICATION_TTL);
+
+    return () => clearTimeout(timeoutRef);
+  }, []);
+
+  return (
+    <motion.div
+      layout
+      initial={{ y: -15, scale: 0.95 }}
+      animate={{ y: 0, scale: 1 }}
+      exit={{ x: "100%", opacity: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="p-2 flex items-start rounded gap-2 text-xs font-medium shadow-lg text-white bg-indigo-500 pointer-events-auto"
+    >
+      <FiCheckSquare className="mt-0.5" />
+      <span>{text}</span>
+      <button onClick={() => removeNotif(id)} className="ml-auto mt-0.5">
+        <FiX />
+      </button>
+    </motion.div>
+  );
+};
+
+const EventForm = ({ addNotification }) => {
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required("Name is required"),
+    email: Yup.string().email("Invalid email").required("Email is required"),
+    eventDate: Yup.string().required("Event date and time is required"),
+    description: Yup.string().required("Description is required"),
+  });
+
+  return (
+    <Formik
+      initialValues={{ name: "", email: "", eventDate: "", description: "" }}
+      validationSchema={validationSchema}
+      onSubmit={async (values, { setSubmitting, resetForm }) => {
+        try {
+          const response = await fetch('/api/events', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(values),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to submit form');
+          }
+
+          const data = await response.json();
+          console.log('Success:', data);
+          resetForm();
+          addNotification("Event submitted successfully!");
+        } catch (error) {
+          console.error('Error:', error);
+          addNotification("Error submitting event. Please try again.");
+        } finally {
+          setSubmitting(false);
+        }
+      }}
+    >
+      {({ isSubmitting }) => (
+        <Form className="bg-white/80 shadow-lg rounded-lg p-6">
+          <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
+            Add Your Community Space Meeting
+          </h2>
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-gray-700">
+              Name
+            </label>
+            <Field
+              type="text"
+              name="name"
+              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+            />
+            <ErrorMessage name="name" component="div" className="text-red-500 text-sm" />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-gray-700">
+              Email
+            </label>
+            <Field
+              type="email"
+              name="email"
+              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+            />
+            <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="eventDate" className="block text-gray-700">
+              Date and Time
+            </label>
+            <Field
+              type="datetime-local"
+              name="eventDate"
+              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+            />
+            <ErrorMessage name="eventDate" component="div" className="text-red-500 text-sm" />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="description" className="block text-gray-700">
+              Description
+            </label>
+            <Field
+              as="textarea"
+              name="description"
+              rows="4"
+              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200"
+            />
+            <ErrorMessage name="description" component="div" className="text-red-500 text-sm" />
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300"
+          >
+            Submit
+          </button>
+          <Link href="/community-spaces" className="w-full mt-2 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition duration-300 inline-block text-center">
+            Check Out Community Spaces
+          </Link>
+        </Form>
+      )}
+    </Formik>
+  );
+};
+
+const Gaze = () => {
   const [gradientDeg, setGradientDeg] = useState(0);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setGradientDeg((prev) => (prev + 1) % 360);
     }, 50);
-    return () => clearInterval(interval);
+
+    const script = document.createElement('script');
+    script.src = "https://nightsky.jpl.nasa.gov/js/nsn_search_widget.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      if (window.nsn_search_widget) {
+        window.nsn_search_widget.init("nsn", {});
+      }
+    };
+
+    return () => {
+      clearInterval(interval);
+      document.body.removeChild(script);
+    };
   }, []);
+
+  const addNotification = (text) => {
+    const newNotif = {
+      id: Math.random(),
+      text: text,
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
 
   const gradientStyle = {
     background: `linear-gradient(${gradientDeg}deg, #ff00ff, #00ffff, #ff00ff)`,
-    padding: '2px', // This creates the border effect
   };
 
   return (
-    <div style={gradientStyle} className="fixed top-0 left-0 right-0 rounded-b-lg z-50">
-      <nav className="bg-gray-900/80 text-white rounded-full px-4 py-2 flex justify-center items-center space-x-6">
-        <Link href="../../" className="hover:text-gray-400">Home</Link>
-        <Link href="/about" className="hover:text-gray-400">About</Link>
-        <Link href="/pricing" className="hover:text-gray-400">Pricing</Link>
-        <button className="bg-gray-800 text-white px-4 py-1 rounded-full border border-gray-700 hover:bg-gray-700">
-          Join waitlist
-        </button>
-      </nav>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mx-auto my-8 max-w-7xl">
+      <div className="bg-white/80 shadow-lg rounded-lg p-6">
+        <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
+          Local Astronomy Events
+        </h2>
+        <div id="nsn" className="bg-gray-100 p-4 rounded-lg min-h-[350px]">
+          {/* The NSN widget will be inserted here */}
+        </div>
+        <div className="mt-6">
+          <h3 className="text-xl font-semibold mb-2">How to Use:</h3>
+          <ol className="list-decimal list-inside text-gray-700">
+            <li>Enter your location in the widget above.</li>
+            <li>Browse through the list of upcoming astronomy events.</li>
+            <li>Click on an event for more details and registration information.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div className="rounded-lg overflow-hidden" style={gradientStyle}>
+        <div className="bg-black/70 p-6 h-full">
+          <EventForm addNotification={addNotification} />
+        </div>
+      </div>
+      <SlideInNotifications notifications={notifications} setNotifications={setNotifications} />
     </div>
   );
 };
 
-const Layout = ({ children }) => {
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-  }, []);
-
+const App = () => {
   return (
     <div className="min-h-screen bg-gray-950 relative overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -48,69 +232,10 @@ const Layout = ({ children }) => {
           <Stars radius={50} count={5000} factor={4} fade speed={2} />
         </Canvas>
       </div>
-      <Navbar />
-      <main className="relative z-10 pt-24"> {/* Adjusted padding-top to create space below navbar */}
-        {children}
+      <main className="relative z-10 pt-24">
+        <Gaze />
       </main>
     </div>
-  );
-};
-
-const Gaze = () => {
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://nightsky.jpl.nasa.gov/js/nsn_search_widget.js";
-    script.async = true;
-    script.onload = () => {
-      if (window.nsn_search_widget) {
-        window.nsn_search_widget.init("nsn", {
-          zip: '86001',
-          city: 'Flagstaff',
-          state: 'AZ'
-        });
-      }
-    };
-    document.body.appendChild(script);
-  }, []);
-
-  return (
-    <div className="bg-white/80 shadow-lg rounded-lg p-6 max-w-xl mx-auto my-8">
-      <style jsx>{`
-        #nsn input::placeholder {
-          color: #4B5563 !important;
-        }
-        #nsn select {
-          color: #4B5563 !important;
-        }
-        body {
-          margin: 0;
-          padding: 0;
-          background-color: #000;
-        }
-      `}</style>
-      <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
-        Local Astronomy Events
-      </h2>
-      <div id="nsn" className="bg-gray-100 p-4 rounded-lg">
-        {/* The widget will be inserted here */}
-      </div>
-      <div className="mt-6">
-        <h3 className="text-xl font-semibold mb-2">How to Use:</h3>
-        <ol className="list-decimal list-inside text-gray-700">
-          <li>Enter your location in the widget above.</li>
-          <li>Browse through the list of upcoming astronomy events.</li>
-          <li>Click on an event for more details and registration information.</li>
-        </ol>
-      </div>
-    </div>
-  );
-};
-
-const App = () => {
-  return (
-    <Layout>
-      <Gaze />
-    </Layout>
   );
 };
 

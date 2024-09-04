@@ -1,8 +1,14 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Canvas } from "@react-three/fiber";
+import { Stars } from "@react-three/drei";
+import { FaArrowLeft } from 'react-icons/fa';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const CelestialBodyCard = ({ body }) => (
-  <div className="max-w-sm rounded overflow-hidden shadow-lg m-4 bg-white">
+  <div className="max-w-sm rounded overflow-hidden shadow-lg m-4 bg-gray-800 bg-opacity-70 text-white">
     <div className="h-64 overflow-hidden">
       <img 
         className="w-full h-full object-cover object-center"
@@ -15,9 +21,9 @@ const CelestialBodyCard = ({ body }) => (
       />
     </div>
     <div className="px-6 py-4">
-      <div className="font-bold text-xl mb-2 text-gray-800">{body.name}</div>
-      <p className="text-gray-700 text-base mb-4">{body.description}</p>
-      <div className="text-gray-600 text-sm">
+      <div className="font-bold text-xl mb-2">{body.name}</div>
+      <p className="text-gray-300 text-base mb-4">{body.description}</p>
+      <div className="text-gray-400 text-sm">
         <p className="mb-1"><span className="font-semibold">Mass:</span> {body.mass}</p>
         <p className="mb-1"><span className="font-semibold">Radius:</span> {body.radius}</p>
         <p className="mb-1"><span className="font-semibold">Orbit:</span> {body.orbit}</p>
@@ -28,7 +34,55 @@ const CelestialBodyCard = ({ body }) => (
   </div>
 );
 
+const ShuffleHero = ({ onSearch, searchQuery, setSearchQuery }) => {
+  return (
+    <section className="w-full px-8 py-12 grid grid-cols-1 md:grid-cols-2 items-center gap-8 max-w-6xl mx-auto relative">
+      <div className="relative z-10">
+        <div className="flex items-center mb-4">
+          <Link href="/" className="text-blue-400 hover:text-blue-300 transition-colors mr-2">
+            <FaArrowLeft size={20} />
+          </Link>
+          <span className="text-xs md:text-sm text-blue-400 font-medium">
+            Explore the Cosmos
+          </span>
+        </div>
+        <h3 className="text-4xl md:text-6xl font-semibold text-white">
+          Discover the Wonders of Space
+        </h3>
+        <p className="text-base md:text-lg text-gray-300 my-4 md:my-6">
+          Embark on a journey through the universe, uncover celestial mysteries, and explore the vastness of space.
+        </p>
+        <form onSubmit={onSearch} className="flex">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for space topics..."
+            className="w-full px-4 py-2 rounded-l-lg focus:outline-none text-gray-800"
+          />
+          <button type="submit" className="bg-blue-500 text-white font-medium py-2 px-4 rounded-r-lg transition-all hover:bg-blue-600 active:scale-95">
+            Search
+          </button>
+        </form>
+      </div>
+      <div className="relative w-full h-64">
+        <Image 
+          src="/bg.jpg" 
+          alt="Space"
+          layout="fill"
+          objectFit="cover"
+          className="rounded-lg shadow-lg"
+        />
+      </div>
+    </section>
+  );
+};
+
 export default function SolarSystem() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState('');
+  const [nasaImageOfDay, setNasaImageOfDay] = useState(null);
+
   const celestialBodies = {
     sun: {
       name: 'Sun',
@@ -134,35 +188,86 @@ export default function SolarSystem() {
     },
   };
 
+  useEffect(() => {
+    const fetchNasaImageOfDay = async () => {
+      try {
+        const response = await axios.get(
+          `https://api.nasa.gov/planetary/apod?api_key=hPMDXfQykh4DKfeHNFDz7zejco621qW9Pov7wfPk`
+        );
+        setNasaImageOfDay(response.data);
+      } catch (error) {
+        console.error('Error fetching NASA Image of the Day:', error);
+      }
+    };
+
+    fetchNasaImageOfDay();
+  }, []);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.get(
+        `https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=1&srsearch=${encodeURIComponent(searchQuery)}`
+      );
+      const pages = response.data.query.search;
+      if (pages.length > 0) {
+        const pageId = pages[0].pageid;
+        const contentResponse = await axios.get(
+          `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&format=json&origin=*&pageids=${pageId}`
+        );
+        const content = contentResponse.data.query.pages[pageId].extract;
+        setSearchResults(content);
+      } else {
+        setSearchResults('No results found. Please try another query.');
+      }
+    } catch (error) {
+      console.error('Error searching Wikipedia:', error);
+      setSearchResults('Sorry, I couldn\'t find information about that. Please try another query.');
+    }
+  };
+
   return (
-    <main className="bg-gray-100 min-h-screen py-8">
-      <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Our Solar System</h1>
-      
-      {/* Sun Section */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">The Sun</h2>
-        <div className="flex justify-center">
-          <CelestialBodyCard body={celestialBodies.sun} />
-        </div>
-      </section>
+    <main className="min-h-screen relative overflow-hidden bg-gray-900 text-white">
+      <div className="fixed inset-0 z-0">
+        <Canvas>
+          <Stars radius={300} depth={60} count={20000} factor={7} saturation={0} fade />
+        </Canvas>
+      </div>
 
-      {/* Planets Section */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">The Planets</h2>
-        <div className="flex flex-wrap justify-center px-4">
-          {celestialBodies.planets.map((planet, index) => (
-            <CelestialBodyCard key={index} body={planet} />
-          ))}
-        </div>
-      </section>
+      <div className="relative z-10">
+        <ShuffleHero onSearch={handleSearch} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-      {/* Moon Section */}
-      <section>
-        <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">The Moon</h2>
-        <div className="flex justify-center">
-          <CelestialBodyCard body={celestialBodies.moon} />
+        <div className="container mx-auto px-4 py-8">
+          {searchResults && (
+            <div className="mt-4 p-4 bg-gray-800 bg-opacity-70 rounded-lg">
+              <h2 className="text-2xl font-bold mb-2">Search Results</h2>
+              <p>{searchResults}</p>
+            </div>
+          )}
+
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold mb-4 text-center">Our Solar System</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[celestialBodies.sun, ...celestialBodies.planets, celestialBodies.moon].map((body, index) => (
+                <CelestialBodyCard key={index} body={body} />
+              ))}
+            </div>
+          </section>
+
+          {nasaImageOfDay && (
+            <section>
+              <h2 className="text-3xl font-bold mb-4 text-center">NASA Image of the Day</h2>
+              <div className="bg-gray-800 bg-opacity-70 rounded-lg overflow-hidden">
+                <img src={nasaImageOfDay.url} alt={nasaImageOfDay.title} className="w-full h-64 object-cover" />
+                <div className="p-4">
+                  <h3 className="text-xl font-semibold mb-2">{nasaImageOfDay.title}</h3>
+                  <p className="text-sm">{nasaImageOfDay.explanation}</p>
+                </div>
+              </div>
+            </section>
+          )}
         </div>
-      </section>
+      </div>
     </main>
   );
 }
