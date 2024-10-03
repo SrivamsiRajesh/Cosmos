@@ -1,9 +1,9 @@
 import Image from "next/image";
-import ISSTracker from "./ISSTracker";
+import SolarSystem from "./SolarSystem";
 export default function Home() {
   return (
     <main>
-      <ISSTracker />
+      <SolarSystem />
 
     </main>
   );

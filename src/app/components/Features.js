@@ -81,13 +81,13 @@ export const Features = () => {
           {/* New feature cards */}
           <div className="flex flex-col w-full mb-10 sm:flex-row">
           <ServiceCard
-  title="ISS Tracker 🛰️"
-  description="Track the International Space Station in real-time. Get live updates on its current position, view its location on a map, and find out when you can spot it from your area."
+  title="Solar System Explorer 🌌"
+  description="Explore our solar system in this interactive 3D model. Zoom in and out, rotate, and click on planets to learn more about them."
   borderColor="border-blue-500"
   bgColor="bg-blue-500"
   textColor="text-blue-500"
   direction="left"
-  link="./components/ISSTracker"
+  link="./components/SolarSystem"
 />
             <ServiceCard
               title="Space Careers 👨‍🚀"
