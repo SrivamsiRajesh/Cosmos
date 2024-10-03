@@ -58,7 +58,7 @@ export const Features = () => {
               link="./components/SpaceNews"
             />
           </div>
-          <div className="flex flex-col w-full mb-5 sm:flex-row">
+          <div className="flex flex-col w-full mb-10 sm:flex-row">
             <ServiceCard
               title="Space Events 🌠"
               description="Stay updated on upcoming celestial events and local astronomy gatherings that ignite your passion for space. Participate in engaging discussions, hands-on activities, and expert-led sessions."
@@ -76,6 +76,18 @@ export const Features = () => {
               textColor="text-yellow-400"
               direction="right"
               link="./components/RocketLaunches"
+            />
+          </div>
+          {/* New Game Section */}
+          <div className="flex flex-col w-full mb-5 sm:flex-row">
+            <ServiceCard
+              title="Asteroid Dodger 🎮"
+              description="Experience the thrill of space exploration with our new Asteroid Dodger! Dodge Asteriods and keep your rocket safe until the end. Can you do it?"
+              borderColor="border-green-400"
+              bgColor="bg-green-400"
+              textColor="text-green-400"
+              direction="left"
+              link="./components/rocketdodge"
             />
           </div>
         </div>
