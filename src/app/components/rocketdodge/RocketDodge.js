@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stars } from "@react-three/drei";
 import { FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
@@ -43,6 +43,32 @@ const Asteroid = ({ position, onCollision }) => {
   );
 };
 
+const GameScene = ({ rocketPosition, asteroids, setGameOver }) => {
+  useFrame(() => {
+    asteroids.forEach(asteroid => {
+      const dx = asteroid.position[0] - rocketPosition[0];
+      const dy = asteroid.position[1] - rocketPosition[1];
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 1) {
+        setGameOver(true);
+      }
+    });
+  });
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
+      <Rocket position={rocketPosition} />
+      {asteroids.map(asteroid => (
+        <Asteroid key={asteroid.id} position={asteroid.position} onCollision={() => {}} />
+      ))}
+    </>
+  );
+};
+
 const RocketDodge = () => {
   const [rocketPosition, setRocketPosition] = useState([0, -10]);
   const [asteroids, setAsteroids] = useState([]);
@@ -62,33 +88,26 @@ const RocketDodge = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [rocketPosition]);
 
-  useFrame(() => {
+  useEffect(() => {
     if (!gameOver) {
-      setScore(prevScore => prevScore + 1);
+      const intervalId = setInterval(() => {
+        setScore(prevScore => prevScore + 1);
 
-      if (Math.random() < 0.02) {
-        setAsteroids(prevAsteroids => [
-          ...prevAsteroids,
-          { id: Date.now(), position: [Math.random() * 20 - 10, 15] }
-        ]);
-      }
+        if (Math.random() < 0.02) {
+          setAsteroids(prevAsteroids => [
+            ...prevAsteroids,
+            { id: Date.now(), position: [Math.random() * 20 - 10, 15] }
+          ]);
+        }
 
-      setAsteroids(prevAsteroids =>
-        prevAsteroids.filter(asteroid => {
-          const dx = asteroid.position[0] - rocketPosition[0];
-          const dy = asteroid.position[1] - rocketPosition[1];
-          const distance = Math.sqrt(dx * dx + dy * dy);
+        setAsteroids(prevAsteroids =>
+          prevAsteroids.filter(asteroid => asteroid.position[1] > -15)
+        );
+      }, 16); // roughly 60 fps
 
-          if (distance < 1) {
-            setGameOver(true);
-            return false;
-          }
-
-          return asteroid.position[1] > -15;
-        })
-      );
+      return () => clearInterval(intervalId);
     }
-  });
+  }, [gameOver]);
 
   const restartGame = () => {
     setRocketPosition([0, -10]);
@@ -100,13 +119,7 @@ const RocketDodge = () => {
   return (
     <div className="relative w-full h-screen">
       <Canvas camera={{ position: [0, 0, 15], fov: 75 }} style={{ height: "100vh", width: "100vw" }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
-        <Rocket position={rocketPosition} />
-        {asteroids.map(asteroid => (
-          <Asteroid key={asteroid.id} position={asteroid.position} onCollision={() => {}} />
-        ))}
+        <GameScene rocketPosition={rocketPosition} asteroids={asteroids} setGameOver={setGameOver} />
       </Canvas>
 
       {/* Back button */}
