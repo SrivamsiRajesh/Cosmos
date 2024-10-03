@@ -78,6 +78,27 @@ export const Features = () => {
               link="./components/RocketLaunches"
             />
           </div>
+          {/* New feature cards */}
+          <div className="flex flex-col w-full mb-10 sm:flex-row">
+          <ServiceCard
+  title="ISS Tracker 🛰️"
+  description="Track the International Space Station in real-time. Get live updates on its current position, view its location on a map, and find out when you can spot it from your area."
+  borderColor="border-blue-500"
+  bgColor="bg-blue-500"
+  textColor="text-blue-500"
+  direction="left"
+  link="./components/ISSTracker"
+/>
+            <ServiceCard
+              title="Space Careers 👨‍🚀"
+              description="Discover exciting career opportunities in the space industry. From aerospace engineering to astrobiology, explore the diverse fields that contribute to space exploration and find your place in the cosmos."
+              borderColor="border-red-500"
+              bgColor="bg-red-500"
+              textColor="text-red-500"
+              direction="right"
+              link="./components/SpaceCareers"
+            />
+          </div>
         </div>
       </div>
     </section>
